@@ -19,7 +19,8 @@ const errorHandler = require('./middleware/errorHandler');
 app.use('/users', usersRouter);
 
 const moviesRouter = require('./routers/movie');
-app.use('/movies', moviesRouter);
+const authUser = require('./middleware/auth');
+app.use('/movies', authUser, moviesRouter);
 
 app.get('*', (req, res) => {
   res.json({ ok: true });

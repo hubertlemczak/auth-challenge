@@ -8,23 +8,80 @@ const apiUrl = 'http://localhost:4000';
 function App() {
   const [movies, setMovies] = useState([]);
 
-  useEffect(() => {
-    fetch(`${apiUrl}/movie`)
+  const fetchMovies = async () => {
+    const opts = {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        authorization: localStorage.getItem('accessToken'),
+      },
+    };
+    fetch(`${apiUrl}/movies`, opts)
       .then(res => res.json())
-      .then(res => setMovies(res.data));
-  }, []);
+      .then(res => {
+        if (res.error) {
+          return alert(res.error);
+        }
+        setMovies(res.data);
+      });
+  };
+
+  useEffect(fetchMovies, []);
 
   const handleRegister = async ({ username, password }) => {
-    
+    const opts = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    };
+
+    const res = await fetch(`${apiUrl}/users/register`, opts);
+    const data = await res.json();
+
+    if (data.error) {
+      return alert(data.error);
+    }
   };
 
   const handleLogin = async ({ username, password }) => {
-    
+    const opts = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    };
+
+    const res = await fetch(`${apiUrl}/users/login`, opts);
+    const data = await res.json();
+
+    if (data.error) {
+      return alert(data.error);
+    }
+
+    const token = 'Bearer ' + data.data;
+
+    localStorage.setItem('accessToken', token);
+    fetchMovies();
   };
-  
+
   const handleCreateMovie = async ({ title, description, runtimeMins }) => {
-    
-  }
+    const opts = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        authorization: localStorage.getItem('accessToken'),
+      },
+      body: JSON.stringify({ title, description, runtimeMins }),
+    };
+
+    const res = await fetch(`${apiUrl}/movies`, opts);
+    const data = await res.json();
+
+    if (data.error) {
+      return alert(data.error);
+    }
+
+    setMovies(curr => [...curr, data.data]);
+  };
 
   return (
     <div className="App">

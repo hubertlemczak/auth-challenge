@@ -2,7 +2,9 @@ const { MyError, MY_ERRORS } = require('../utils/error');
 const prisma = require('../utils/prisma');
 
 const getAllMovies = async (req, res) => {
-  const movies = await prisma.movie.findMany();
+  const movies = await prisma.movie.findMany({
+    where: { userId: req.user?.id },
+  });
 
   res.json({ data: movies });
 };
@@ -19,6 +21,7 @@ const createMovie = async (req, res) => {
       title,
       description,
       runtimeMins,
+      userId: req.user.id,
     },
   });
 
