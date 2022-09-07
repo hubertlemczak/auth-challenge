@@ -1,31 +1,31 @@
-const jwt = require('jsonwebtoken');
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
-
-const jwtSecret = 'mysecret';
+const { MyError, MY_ERRORS } = require('../utils/error');
+const prisma = require('../utils/prisma');
 
 const getAllMovies = async (req, res) => {
-    const movies = await prisma.movie.findMany();
+  const movies = await prisma.movie.findMany();
 
-    res.json({ data: movies });
+  res.json({ data: movies });
 };
 
 const createMovie = async (req, res) => {
-    const { title, description, runtimeMins } = req.body;
+  const { title, description, runtimeMins } = req.body;
 
-    try {
-        const token = null;
-        // todo verify the token
-    } catch (e) {
-        return res.status(401).json({ error: 'Invalid token provided.' })
-    }
+  if (!title || !description || !runtimeMins) {
+    throw new MyError(MY_ERRORS.MISSING_BODY);
+  }
 
-    const createdMovie = null;
+  const createdMovie = await prisma.movie.create({
+    data: {
+      title,
+      description,
+      runtimeMins,
+    },
+  });
 
-    res.json({ data: createdMovie });
+  res.json({ data: createdMovie });
 };
 
 module.exports = {
-    getAllMovies,
-    createMovie
+  getAllMovies,
+  createMovie,
 };

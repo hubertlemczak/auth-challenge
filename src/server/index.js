@@ -1,39 +1,33 @@
-// Load our .env file
 require('dotenv').config();
 
-// Import express and cors
 const express = require('express');
+require('express-async-errors');
 const cors = require('cors');
+const morgan = require('morgan');
 
-// Set up express
 const app = express();
+
 app.disable('x-powered-by');
+
 app.use(cors());
-// Tell express to use a JSON parser middleware
+app.use(morgan('dev'));
 app.use(express.json());
-// Tell express to use a URL Encoding middleware
 app.use(express.urlencoded({ extended: true }));
 
+const usersRouter = require('./routers/user');
+const errorHandler = require('./middleware/errorHandler');
+app.use('/users', usersRouter);
 
+const moviesRouter = require('./routers/movie');
+app.use('/movies', moviesRouter);
 
-
-const userRouter = require('./routers/user');
-app.use('/user', userRouter);
-
-const movieRouter = require('./routers/movie');
-app.use('/movie', movieRouter);
-
-
-
-
-// Set up a default "catch all" route to use when someone visits a route
-// that we haven't built
 app.get('*', (req, res) => {
-    res.json({ ok: true });
+  res.json({ ok: true });
 });
 
-// Start our API server
+app.use(errorHandler);
+
 const port = process.env.PORT || 4000;
 app.listen(port, () => {
-    console.log(`\n Server is running on http://localhost:${port}\n`);
+  console.log(`\n Server is running on http://localhost:${port}\n`);
 });
